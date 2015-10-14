@@ -407,13 +407,13 @@ mat<T,N,M> &operator /=(mat<T,N,M> &m, T s)
 
 typedef mat<double,2,2> dmat2;
 typedef mat<float,2,2>  fmat2;
-typedef mat<int,2,2>	   imat2;
+typedef mat<int,2,2>    imat2;
 typedef mat<double,3,3> dmat3;
 typedef mat<float,3,3>  fmat3;
-typedef mat<int,3,3>	   imat3;
+typedef mat<int,3,3>    imat3;
 typedef mat<double,4,4> dmat4;
 typedef mat<float,4,4>  fmat4;
-typedef mat<int,4,4>	   imat4;
+typedef mat<int,4,4>    imat4;
 typedef dmat2 mat2;
 typedef dmat3 mat3;
 typedef dmat4 mat4;
