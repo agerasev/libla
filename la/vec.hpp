@@ -261,9 +261,28 @@ vec<typename std::common_type<T,S>::type,N> operator -(const vec<T,N> &a, const 
 }
 
 template<typename T, typename S, int N>
-vec<typename std::common_type<T,S>::type,N> operator /(const vec<T,N> &b, S a) 
+typename std::enable_if<
+  std::is_floating_point<typename std::common_type<T,S>::type>::value, 
+  vec<typename std::common_type<T,S>::type,N>
+  >::type
+ operator /(const vec<T,N> &b, S a) 
 {
 	return b*(static_cast<typename std::common_type<T,S>::type>(1)/static_cast<typename std::common_type<T,S>::type>(a));
+}
+
+template<typename T, typename S, int N>
+typename std::enable_if<
+  !std::is_floating_point<typename std::common_type<T,S>::type>::value, 
+  vec<typename std::common_type<T,S>::type,N>
+  >::type
+ operator /(const vec<T,N> &b, S a) 
+{
+	vec<typename std::common_type<T,S>::type,N> c;
+	for(int i = 0; i < N; ++i) 
+	{
+		c.data[i] = b.data[i]/a;
+	}
+	return c;
 }
 
 /* Assign operations */
