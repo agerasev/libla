@@ -53,18 +53,18 @@ struct vec
 	
 	/* Data */
 	
-	T data[N];
+	T _data[N];
 	
 	template <typename S>
 	void memcopy(const S *src, int d = 1)
 	{
-		__vec_tools__::memcopy<T,S,N>(data,src,d);
+		__vec_tools__::memcopy<T,S,N>(_data,src,d);
 	}
 	
 	template <typename ... Args>
 	void unroll(Args ... args)
 	{
-		__vec_tools__::Unroller<T,N>::unroll(data,args...);
+		__vec_tools__::Unroller<T,N>::unroll(_data,args...);
 	}
 
 	/* Constructors */
@@ -86,7 +86,7 @@ struct vec
 	template <typename S>
 	vec(const vec<S,N> &v)
 	{
-		memcopy(v.data);
+		memcopy(v._data);
 	}
 	
 	/* Assign operators */
@@ -94,72 +94,82 @@ struct vec
 	template <typename S>
 	vec &operator = (const vec<S,N> &v)
 	{
-		memcopy(v.data);
+		memcopy(v._data);
 		return *this;
 	}
 	
 	/* Access operators */
 	
+	T *data() 
+	{
+		return _data;
+	}
+	
+	const T *data() const 
+	{
+		return _data;
+	}
+	
 	T &operator [](int n)
 	{
-		return data[n];
+		return _data[n];
 	}
 	
 	T operator [](int n) const 
 	{
-		return data[n];
+		return _data[n];
 	}
 	
 	T &operator ()(int n) 
 	{
-		return data[n];
+		return _data[n];
 	}
 	
 	T operator ()(int n) const 
 	{
-		return data[n];
+		return _data[n];
 	}
 	
 		/* Index access */
 	
 	T x() const
 	{
-		return data[0];
+		return _data[0];
 	}
 	
 	T &x()
 	{
-		return data[0];
+		return _data[0];
 	}
 	
 	T y() const
 	{
-		return data[1];
+		return _data[1];
 	}
 	
 	T &y()
 	{
-		return data[1];
+		return _data[1];
 	}
 	
 	T z() const
 	{
-		return data[2];
+		return _data[2];
 	}
 	
 	T &z()
 	{
-		return data[2];
+		return _data[2];
 	}
 	
 	T w() const
 	{
-		return data[3];
+		return _data[3];
 	}
 	
 	T &w()
 	{
-		return data[3];
+		return _data[3];
 	}
 };
 
@@ -171,7 +181,7 @@ vec<typename std::common_type<T,S>::type,N> operator +(const vec<T,N> &a, const 
 	vec<typename std::common_type<T,S>::type,N> c;
 	for(int i = 0; i < N; ++i) 
 	{
-		c.data[i] = a.data[i] + b.data[i];
+		c._data[i] = a._data[i] + b._data[i];
 	}
 	return c;
 }
@@ -184,7 +194,7 @@ vec<typename std::common_type<T,S>::type,N> operator *(S a, const vec<T,N> &b)
 	vec<typename std::common_type<T,S>::type,N> c;
 	for(int i = 0; i < N; ++i) 
 	{
-		c.data[i] = a*b.data[i];
+		c._data[i] = a*b._data[i];
 	}
 	return c;
 }
@@ -197,7 +207,7 @@ vec<T,N> operator &(const vec<T,N> &a, const vec<T,N> &b)
   vec<T,N> c;
   for(int i = 0; i < N; ++i) 
   {
-	  c.data[i] = a.data[i]*b.data[i];
+	  c._data[i] = a._data[i]*b._data[i];
   }
   return c;
 }
@@ -210,7 +220,7 @@ typename std::common_type<T,S>::type operator *(const vec<T,N> &a, const vec<S,N
 	T c = static_cast<typename std::common_type<T,S>::type>(0);
 	for(int i = 0; i < N; ++i) 
 	{
-		c += a.data[i]*b.data[i];
+		c += a._data[i]*b._data[i];
 	}
 	return c;
 }
@@ -280,7 +290,7 @@ typename std::enable_if<
 	vec<typename std::common_type<T,S>::type,N> c;
 	for(int i = 0; i < N; ++i) 
 	{
-		c.data[i] = b.data[i]/a;
+		c._data[i] = b._data[i]/a;
 	}
 	return c;
 }
@@ -340,7 +350,7 @@ inline bool operator ==(const vec<T,N> &a, const vec<T,N> &b)
 {
 	for(int i = 0; i < N; ++i) 
 	{
-		if(a.data[i] != b.data[i]) 
+		if(a._data[i] != b._data[i]) 
 		{
 			return false;
 		}

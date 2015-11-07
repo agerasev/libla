@@ -38,7 +38,7 @@ struct ArgumentAssigner<T,N,Left,vec<S,N>>
 	static void assign(T *ptr, const vec<S,N> &arg, Args ... args)
 	{
 		static_assert(!(Left%N), "vectors are not aligned with rows");
-		__vec_tools__::memcopy<T,S,N>(ptr,static_cast<vec<T,N>>(arg).data);
+		__vec_tools__::memcopy<T,S,N>(ptr,static_cast<vec<T,N>>(arg)._data);
 		Unroller<T,N,Left-N>::unroll(ptr+N,args...);
 	}
 };
@@ -78,18 +78,18 @@ struct mat
 	
 	/* Data */
 	
-	T data[N*M];
+	T _data[N*M];
 	
 	template <typename S>
 	void memcopy(const S *src, int dy = 0, int dx = 1)
 	{
-		__mat_tools__::memcopy<T,S,N,M>(data,src,dy,dx);
+		__mat_tools__::memcopy<T,S,N,M>(_data,src,dy,dx);
 	}
 	
 	template <typename ... Args>
 	void unroll(Args ... args)
 	{
-		__mat_tools__::Unroller<T,N,N*M>::unroll(data,args...);
+		__mat_tools__::Unroller<T,N,N*M>::unroll(_data,args...);
 	}
 	
 	/* Constructors */
@@ -110,7 +110,7 @@ struct mat
 	template <typename S>
 	mat(const mat<S,N,M> &m)
 	{
-		memcopy(m.data);
+		memcopy(m._data);
 	}
 	
 	/* Assign operators */
@@ -118,20 +118,30 @@ struct mat
 	template <typename S>
 	mat<T,N,M> &operator =(const mat<S,N,M> &m)
 	{
-		memcopy(m.data);
+		memcopy(m._data);
 		return *this;
 	}
 
 	/* Access operators */
 	
+	T *data() 
+	{
+		return _data;
+	}
+	
+	const T *data() const 
+	{
+		return _data;
+	}
+	
 	T &get(int x, int y)
 	{
-		return data[y*N + x];
+		return _data[y*N + x];
 	}
 	
 	T get(int x, int y) const
 	{
-		return data[y*N + x];
+		return _data[y*N + x];
 	}
 	
 	T &operator ()(int x, int y)
@@ -157,14 +167,14 @@ struct mat
 	vec<T,N> row(int n) const
 	{
 		vec<T,N> ret;
-		ret.memcopy(data + n*N);
+		ret.memcopy(_data + n*N);
 		return ret;
 	}
 	
 	vec<T,M> col(int n) const
 	{
 		vec<T,N> ret;
-		ret.memcopy(data + n,N);
+		ret.memcopy(_data + n,N);
 		return ret;
 	}
 	
@@ -180,12 +190,12 @@ struct mat
 	
 	T *operator[](int n)
 	{
-		return data + n*N;
+		return _data + n*N;
 	}
 	
 	const T *operator[](int n) const
 	{
-		return data + n*N;
+		return _data + n*N;
 	}
 	
 	/* Submatrix */
@@ -237,7 +247,7 @@ struct Determinator<T,1>
 {
 	static T det(const mat<T,1,1> &m)
 	{
-		return m.data[0];
+		return m._data[0];
 	}
 };
 
@@ -248,7 +258,7 @@ struct Determinator<T,1>
 template <typename T, int N, int M>
 mat<T,M,N> transpose(const mat<T,N,M> &m)
 {
-	return mat<T,M,N>().memcopy(m.data,-M*N+1,N);
+	return mat<T,M,N>().memcopy(m._data,-M*N+1,N);
 }
 
 /* Determinant */
@@ -298,7 +308,7 @@ mat<typename std::common_type<T,S>::type,N,M> operator +(const mat<T,N,M> &a, co
 	mat<typename std::common_type<T,S>::type,N,M> c;
 	for(int i = 0; i < N*M; ++i) 
 	{
-		c.data[i] = a.data[i] + b.data[i];
+		c._data[i] = a._data[i] + b._data[i];
 	}
 	return c;
 }
@@ -311,7 +321,7 @@ mat<typename std::common_type<T,S>::type,N,M> operator *(const mat<T,N,M> &m, S 
 	mat<typename std::common_type<T,S>::type,N,M> c;
 	for(int i = 0; i < N*M; ++i) 
 	{
-		c.data[i] = s*m.data[i];
+		c._data[i] = s*m._data[i];
 	}
 	return c;
 }
