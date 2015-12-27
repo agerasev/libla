@@ -258,7 +258,9 @@ struct Determinator<T,1>
 template <typename T, int N, int M>
 mat<T,M,N> transpose(const mat<T,N,M> &m)
 {
-	return mat<T,M,N>().memcopy(m._data,-M*N+1,N);
+	mat<T,M,N> r;
+	r.memcopy(m._data,-M*N+1,N);
+	return r;
 }
 
 /* Determinant */

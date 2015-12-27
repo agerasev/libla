@@ -244,6 +244,16 @@ vec<typename std::common_type<T,S>::type,3> operator ^(const vec<T,3> &a, const 
 	);
 }
 
+template <typename T, typename S>
+vec<typename std::common_type<T,S>::type,4> operator ^(const vec<T,4> &a, const vec<S,4> &b) {
+	return vec<typename std::common_type<T,S>::type,4>(
+	  a[1]*b[2] - b[1]*a[2],
+	  a[2]*b[0] - b[2]*a[0],
+	  a[0]*b[1] - b[0]*a[1],
+	  a[3]*b[3]
+	);
+}
+
 /* Derivative operations */
 
 template<typename T, typename S, int N>
@@ -326,19 +336,25 @@ vec<T,N> &operator /=(vec<T,N> &a, S b)
 #include<cmath>
 
 template<typename T, int N>
-inline T sqr(const vec<T,N> &v) 
+inline T abs2(const vec<T,N> &v) 
 {
 	return v*v;
 }
 
 template<typename T, int N>
-inline T length(const vec<T,N> &v) 
+inline T abs(const vec<T,N> &v) 
 {
-	return sqrt(sqr(v));
+	return sqrt(abs2(v));
 }
 
 template<typename T, int N>
-inline vec<T,N> norm(const vec<T,N> &v) 
+inline T length(const vec<T,N> &v) 
+{
+	return abs(v);
+}
+
+template<typename T, int N>
+inline vec<T,N> normalize(const vec<T,N> &v) 
 {
 	return v/length(v);
 }
