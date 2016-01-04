@@ -64,7 +64,7 @@ struct Unroller<T,N,0>
 
 }
 
-/* Matrix stricture */
+/* Matrix structure */
 /* N - columns, M - rows */
 
 template <typename T, int N, int M>
@@ -107,10 +107,16 @@ struct mat
 	
 	/* Copy constructors */
 	
-	template <typename S>
-	mat(const mat<S,N,M> &m)
+	template <typename S, int _N, int _M>
+	mat(const mat<S,_N,_M> &m) 
 	{
-		memcopy(m._data);
+		for(int iy = 0; iy < M; ++iy) 
+		{
+			for(int ix = 0; ix < N; ++ix) 
+			{
+				_data[N*iy + ix] = static_cast<T>((ix < _N && iy < _M) ? m._data[_N*iy + ix] : (ix == iy ? 1 : 0));
+			}
+		}
 	}
 	
 	/* Assign operators */
@@ -336,7 +342,7 @@ vec<typename std::common_type<T,S>::type,M> operator *(const mat<T,N,M> &m, cons
 	vec<typename std::common_type<T,S>::type,M> c;
 	for(int i = 0; i < M; ++i) 
 	{
-		c(i) = m.row(i)*v;
+		c(i) = dot(m.row(i), v);
 	}
 	return c;
 }
@@ -351,7 +357,7 @@ mat<typename std::common_type<T,S>::type,N,M> operator *(const mat<T,L,M> &a, co
   {
 	  for(int j = 0; j < N; ++j)
 	  {
-		  c(j,i) = a.row(i)*b.col(j);
+		  c(j,i) = dot(a.row(i), b.col(j));
 	  }
   }
   return c;

@@ -2,11 +2,22 @@
 
 #include<type_traits>
 
+template <typename T, int N>
+struct vec;
 
 /* Template tools */
 
 namespace __vec_tools__
 {
+
+template <typename T, typename S, int N>
+void memcopy(T *dst, const S *src, int d = 1)
+{
+	for(int i = 0; i < N; ++i)
+	{
+		dst[i] = static_cast<T>(src[d*i]);
+	}
+}
 
 template <typename T, int Left>
 struct Unroller
@@ -17,6 +28,14 @@ struct Unroller
 	{
 		*ptr = static_cast<T>(arg);
 		Unroller<T,Left-1>::unroll(ptr+1,args...);
+	}
+	
+	template <typename S, int _N, typename ... Args>
+	static void unroll(T *ptr, vec<S,_N> arg, Args ... args)
+	{
+		static_assert(_N <= Left, "arg size larger than needed");
+		__vec_tools__::memcopy<T,S,_N>(ptr,arg._data);
+		Unroller<T,Left-_N>::unroll(ptr+_N,args...);
 	}
 	
 };
@@ -31,15 +50,6 @@ struct Unroller<T,0>
 	}
 	
 };
-
-template <typename T, typename S, int N>
-void memcopy(T *dst, const S *src, int d = 1)
-{
-	for(int i = 0; i < N; ++i)
-	{
-		dst[i] = static_cast<T>(src[d*i]);
-	}
-}
 
 }
 
@@ -130,6 +140,14 @@ struct vec
 		return _data[n];
 	}
 	
+	template <int _N>
+	vec<T,_N> sub(int n = 0) const 
+	{
+		vec<T,_N> r;
+		r.memcopy(_data + n);
+		return r;
+	}
+	
 		/* Index access */
 	
 	T x() const
@@ -202,7 +220,7 @@ vec<typename std::common_type<T,S>::type,N> operator *(S a, const vec<T,N> &b)
 /* Component product */
 
 template<typename T, int N>
-vec<T,N> operator &(const vec<T,N> &a, const vec<T,N> &b) 
+vec<T,N> operator *(const vec<T,N> &a, const vec<T,N> &b) 
 {
   vec<T,N> c;
   for(int i = 0; i < N; ++i) 
@@ -212,10 +230,10 @@ vec<T,N> operator &(const vec<T,N> &a, const vec<T,N> &b)
   return c;
 }
 
-/* Scalar product */
+/* Dot product */
 
 template<typename T, typename S, int N>
-typename std::common_type<T,S>::type operator *(const vec<T,N> &a, const vec<S,N> &b) 
+typename std::common_type<T,S>::type dot(const vec<T,N> &a, const vec<S,N> &b) 
 {
 	T c = static_cast<typename std::common_type<T,S>::type>(0);
 	for(int i = 0; i < N; ++i) 
@@ -228,15 +246,21 @@ typename std::common_type<T,S>::type operator *(const vec<T,N> &a, const vec<S,N
 /* Pseudo cross product */
 
 template <typename T, typename S>
-typename std::common_type<T,S>::type operator ^(const vec<T,2> &a, const vec<S,2> &b)
+typename std::common_type<T,S>::type cross(const vec<T,2> &a, const vec<S,2> &b)
 {
 	return a[0]*b[1] - a[1]*b[0];
+}
+
+template <typename T, typename S>
+typename std::common_type<T,S>::type operator ^(const vec<T,2> &a, const vec<S,2> &b)
+{
+	return cross(a, b);
 }
 
 /* Cross product */
 
 template <typename T, typename S>
-vec<typename std::common_type<T,S>::type,3> operator ^(const vec<T,3> &a, const vec<S,3> &b) {
+vec<typename std::common_type<T,S>::type,3> cross(const vec<T,3> &a, const vec<S,3> &b) {
 	return vec<typename std::common_type<T,S>::type,3>(
 	  a[1]*b[2] - b[1]*a[2],
 	  a[2]*b[0] - b[2]*a[0],
@@ -245,13 +269,36 @@ vec<typename std::common_type<T,S>::type,3> operator ^(const vec<T,3> &a, const 
 }
 
 template <typename T, typename S>
-vec<typename std::common_type<T,S>::type,4> operator ^(const vec<T,4> &a, const vec<S,4> &b) {
+vec<typename std::common_type<T,S>::type,3> operator ^(const vec<T,3> &a, const vec<S,3> &b) {
+	return cross(a, b);
+}
+
+template <typename T, typename S>
+vec<typename std::common_type<T,S>::type,4> cross(const vec<T,4> &a, const vec<S,4> &b) {
 	return vec<typename std::common_type<T,S>::type,4>(
 	  a[1]*b[2] - b[1]*a[2],
 	  a[2]*b[0] - b[2]*a[0],
 	  a[0]*b[1] - b[0]*a[1],
 	  a[3]*b[3]
 	);
+}
+
+template <typename T, typename S>
+vec<typename std::common_type<T,S>::type,4> operator ^(const vec<T,4> &a, const vec<S,4> &b) {
+	return cross(a, b);
+}
+
+/* Division */
+
+template<typename T, typename S, int N>
+vec<typename std::common_type<T,S>::type,N> operator /(const vec<T,N> &a, const vec<S,N> &b) 
+{
+	vec<typename std::common_type<T,S>::type, N> r;
+	for(int i = 0; i < N; ++i) 
+	{
+		r._data[i] = a._data[i]/b._data[i];
+	}
+	return r;
 }
 
 /* Derivative operations */
@@ -338,7 +385,7 @@ vec<T,N> &operator /=(vec<T,N> &a, S b)
 template<typename T, int N>
 inline T abs2(const vec<T,N> &v) 
 {
-	return v*v;
+	return dot(v, v);
 }
 
 template<typename T, int N>
@@ -360,6 +407,7 @@ inline vec<T,N> normalize(const vec<T,N> &v)
 }
 
 /* Comparison */
+// TODO: return bvec as result
 
 template<typename T, int N>
 inline bool operator ==(const vec<T,N> &a, const vec<T,N> &b) 
