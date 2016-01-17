@@ -383,21 +383,26 @@ vec<T,N> &operator /=(vec<T,N> &a, S b)
 #include<cmath>
 
 template<typename T, int N>
-inline T abs2(const vec<T,N> &v) 
+inline T sqr(const vec<T,N> &v) 
 {
 	return dot(v, v);
 }
 
 template<typename T, int N>
-inline T abs(const vec<T,N> &v) 
+inline vec<T,N> abs(const vec<T,N> &v) 
 {
-	return sqrt(abs2(v));
+	vec<T,N> ret;
+	for(int i = 0; i < N; ++i) 
+	{
+		ret._data[i] = v._data[i] > 0 ? v._data[i] : -v._data[i];
+	}
+	return ret;
 }
 
 template<typename T, int N>
 inline T length(const vec<T,N> &v) 
 {
-	return abs(v);
+	return sqrt(sqr(v));
 }
 
 template<typename T, int N>
@@ -407,25 +412,70 @@ inline vec<T,N> normalize(const vec<T,N> &v)
 }
 
 /* Comparison */
-// TODO: return bvec as result
-
 template<typename T, int N>
-inline bool operator ==(const vec<T,N> &a, const vec<T,N> &b) 
+inline vec<bool,N> operator ==(const vec<T,N> &a, const vec<T,N> &b) 
 {
+	vec<bool,N> ret;
 	for(int i = 0; i < N; ++i) 
 	{
-		if(a._data[i] != b._data[i]) 
-		{
-			return false;
-		}
+		ret._data[i] = (a._data[i] == b._data[i]);
 	}
-	return true;
+	return ret;
 }
 
 template<typename T, int N>
-inline bool operator !=(const vec<T,N> &a, const vec<T,N> &b) 
+inline vec<bool,N> operator !=(const vec<T,N> &a, const vec<T,N> &b) 
 {
-	return !(a==b);
+	vec<bool,N> ret;
+	for(int i = 0; i < N; ++i) 
+	{
+		ret._data[i] = (a._data[i] != b._data[i]);
+	}
+	return ret;
+}
+
+template<typename T, int N>
+inline vec<bool,N> operator <(const vec<T,N> &a, const vec<T,N> &b) 
+{
+	vec<bool,N> ret;
+	for(int i = 0; i < N; ++i) 
+	{
+		ret._data[i] = (a._data[i] < b._data[i]);
+	}
+	return ret;
+}
+
+template<typename T, int N>
+inline vec<bool,N> operator >(const vec<T,N> &a, const vec<T,N> &b) 
+{
+	vec<bool,N> ret;
+	for(int i = 0; i < N; ++i) 
+	{
+		ret._data[i] = (a._data[i] > b._data[i]);
+	}
+	return ret;
+}
+
+template<typename T, int N>
+inline vec<bool,N> operator <=(const vec<T,N> &a, const vec<T,N> &b) 
+{
+	vec<bool,N> ret;
+	for(int i = 0; i < N; ++i) 
+	{
+		ret._data[i] = (a._data[i] <= b._data[i]);
+	}
+	return ret;
+}
+
+template<typename T, int N>
+inline vec<bool,N> operator >=(const vec<T,N> &a, const vec<T,N> &b) 
+{
+	vec<bool,N> ret;
+	for(int i = 0; i < N; ++i) 
+	{
+		ret._data[i] = (a._data[i] >= b._data[i]);
+	}
+	return ret;
 }
 
 /* Type aliases and constants */
@@ -433,6 +483,7 @@ inline bool operator !=(const vec<T,N> &a, const vec<T,N> &b)
 typedef vec<double,2> dvec2;
 typedef vec<float,2>  fvec2;
 typedef vec<int,2>    ivec2;
+typedef vec<bool,2>   bvec2;
 
 const dvec2 nulldvec2(0.0,0.0);
 const fvec2 nullfvec2(0.0f,0.0f);
@@ -444,6 +495,7 @@ const vec2 nullvec2 = nulldvec2;
 typedef vec<double,3> dvec3;
 typedef vec<float,3>  fvec3;
 typedef vec<int,3>    ivec3;
+typedef vec<bool,3>   bvec3;
 
 const dvec3 nulldvec3(0.0,0.0,0.0);
 const fvec3 nullfvec3(0.0f,0.0f,0.0f);
@@ -455,6 +507,7 @@ const vec3 nullvec3 = nulldvec3;
 typedef vec<double,4> dvec4;
 typedef vec<float,4>  fvec4;
 typedef vec<int,4>    ivec4;
+typedef vec<bool,4>   bvec4;
 
 const dvec4 nulldvec4(0.0,0.0,0.0,0.0);
 const fvec4 nullfvec4(0.0f,0.0f,0.0f,0.0f);
