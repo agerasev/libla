@@ -478,6 +478,27 @@ inline vec<bool,N> operator >=(const vec<T,N> &a, const vec<T,N> &b)
 	return ret;
 }
 
+
+/* Bool vector functions */
+
+template <typename T, int N>
+bool all(const vec<T, N> &v) {
+	bool c = true;
+	for(int i = 0; i < N; ++i) {
+		c = c && v[i];
+	}
+	return c;
+}
+
+template <typename T, int N>
+bool any(const vec<T, N> &v) {
+	bool c = false;
+	for(int i = 0; i < N; ++i) {
+		c = c || v[i];
+	}
+	return c;
+}
+
 /* Type aliases and constants */
 
 typedef vec<double,2> dvec2;
