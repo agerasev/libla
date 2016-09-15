@@ -56,6 +56,9 @@ struct Unroller<T,0>
 template <typename T, int N>
 struct vec
 {
+	static_assert(std::is_arithmetic<T>::value, "vector must contain arithmetic type");
+	static_assert(N > 0, "vector size must be greater than zero");
+	
 	/* Types */
 	
 	typedef T type;
@@ -204,10 +207,26 @@ vec<typename std::common_type<T,S>::type,N> operator +(const vec<T,N> &a, const 
 	return c;
 }
 
+/* Component product */
+
+template<typename T, typename S, int N>
+vec<typename std::common_type<T,S>::type,N> operator *(const vec<T,N> &a, const vec<S,N> &b) 
+{
+	vec<typename std::common_type<T,S>::type,N> c;
+	for(int i = 0; i < N; ++i) 
+	{
+		c._data[i] = a._data[i]*b._data[i];
+	}
+	return c;
+}
+
 /* Multiplication by constant */
 
 template<typename T, typename S, int N>
-vec<typename std::common_type<T,S>::type,N> operator *(S a, const vec<T,N> &b) 
+typename std::enable_if<
+	std::is_arithmetic<S>::value, 
+	vec<typename std::common_type<T,S>::type,N>
+>::type operator *(S a, const vec<T,N> &b) 
 {
 	vec<typename std::common_type<T,S>::type,N> c;
 	for(int i = 0; i < N; ++i) 
@@ -215,19 +234,6 @@ vec<typename std::common_type<T,S>::type,N> operator *(S a, const vec<T,N> &b)
 		c._data[i] = a*b._data[i];
 	}
 	return c;
-}
-
-/* Component product */
-
-template<typename T, int N>
-vec<T,N> operator *(const vec<T,N> &a, const vec<T,N> &b) 
-{
-  vec<T,N> c;
-  for(int i = 0; i < N; ++i) 
-  {
-	  c._data[i] = a._data[i]*b._data[i];
-  }
-  return c;
 }
 
 /* Dot product */
@@ -304,7 +310,10 @@ vec<typename std::common_type<T,S>::type,N> operator /(const vec<T,N> &a, const 
 /* Derivative operations */
 
 template<typename T, typename S, int N>
-vec<typename std::common_type<T,S>::type,N> operator *(const vec<T,N> &b, S a)
+typename std::enable_if<
+	std::is_arithmetic<S>::value, 
+	vec<typename std::common_type<T,S>::type,N>
+>::type operator *(const vec<T,N> &b, S a)
 {
 	return a*b;
 }
@@ -497,6 +506,25 @@ bool any(const vec<T, N> &v) {
 		c = c || v[i];
 	}
 	return c;
+}
+
+/* Max/min */
+template <typename T, int N>
+T max(const vec<T, N> &v) {
+	T m = v[0];
+	for(int i = 1; i < N; ++i) {
+		m = v[i] > m ? v[i] : m;
+	}
+	return m;
+}
+
+template <typename T, int N>
+T min(const vec<T, N> &v) {
+	T m = v[0];
+	for(int i = 1; i < N; ++i) {
+		m = v[i] < m ? v[i] : m;
+	}
+	return m;
 }
 
 /* Type aliases and constants */
