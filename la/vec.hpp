@@ -488,6 +488,35 @@ inline vec<bool,N> operator >=(const vec<T,N> &a, const vec<T,N> &b)
 }
 
 
+/* Bool vector operators */
+
+template <typename T, int N>
+vec<bool, N> operator ! (const vec<T, N> &v) {
+	vec<bool, N> ret;
+	for(int i = 0; i < N; ++i) {
+		ret._data[i] = !(v._data[i]);
+	}
+	return ret;
+}
+
+template <typename T, typename S, int N>
+vec<bool, N> operator && (const vec<T, N> &a, const vec<S, N> &b) {
+	vec<bool, N> ret;
+	for(int i = 0; i < N; ++i) {
+		ret._data[i] = a._data[i] && b._data[i];
+	}
+	return ret;
+}
+
+template <typename T, typename S, int N>
+vec<bool, N> operator || (const vec<T, N> &a, const vec<S, N> &b) {
+	vec<bool, N> ret;
+	for(int i = 0; i < N; ++i) {
+		ret._data[i] = a._data[i] || b._data[i];
+	}
+	return ret;
+}
+
 /* Bool vector functions */
 
 template <typename T, int N>
